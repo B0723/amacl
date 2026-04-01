@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from .schemas import SeedCase
+from amacl.schemas import SeedCase
 
 
 def load_seed_cases(path: str | Path) -> list[SeedCase]:

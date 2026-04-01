@@ -2,11 +2,11 @@ from __future__ import annotations
 
 import argparse
 
-from .agent import QuestionGenerationAgent
-from .config import DEFAULT_OUTPUT_FILE, DEFAULT_SEED_FILE, RuntimeConfig
-from .modeling import QwenLocalGenerator
-from .planner import MutationPlanner, StrategyPlanner
-from .utils import dump_jsonl, load_seed_cases
+from amacl.agent import QuestionGenerationAgent
+from amacl.config import DEFAULT_OUTPUT_FILE, DEFAULT_SEED_FILE, RuntimeConfig
+from amacl.modeling import QwenLocalGenerator
+from amacl.planner import MutationPlanner, StrategyPlanner
+from amacl.utils import dump_jsonl, load_seed_cases
 
 
 def build_parser() -> argparse.ArgumentParser:

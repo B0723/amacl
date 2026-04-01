@@ -3,9 +3,9 @@ from __future__ import annotations
 import random
 from abc import ABC, abstractmethod
 
-from .config import RuntimeConfig
-from .registry import SAMPLER_REGISTRY, register_sampler
-from .schemas import SeedCase
+from amacl.config import RuntimeConfig
+from amacl.registry import SAMPLER_REGISTRY, register_sampler
+from amacl.schemas import SeedCase
 
 
 class SeedSampler(ABC):

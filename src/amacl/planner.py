@@ -2,12 +2,12 @@ from __future__ import annotations
 
 import json
 
-from .config import RuntimeConfig
-from .modeling import BaseTextGenerator
-from .operators import MutationOperator
-from .schemas import MutationDraft, SamplerDecision, SeedCase
-from .seed_samplers import build_sampler_summaries
-from .utils import extract_json_object
+from amacl.config import RuntimeConfig
+from amacl.modeling import BaseTextGenerator
+from amacl.operators import MutationOperator
+from amacl.schemas import MutationDraft, SamplerDecision, SeedCase
+from amacl.seed_samplers import build_sampler_summaries
+from amacl.utils import extract_json_object
 
 
 SAMPLER_SYSTEM_PROMPT = """你是 AMACL 的 seed 采样策略规划器。

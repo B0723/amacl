@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 
-from .config import RuntimeConfig
+from amacl.config import RuntimeConfig
 
 
 class BaseTextGenerator(ABC):

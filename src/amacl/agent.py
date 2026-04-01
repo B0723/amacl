@@ -2,11 +2,11 @@ from __future__ import annotations
 
 import random
 
-from .config import RuntimeConfig
-from .operators import build_operator_catalogue
-from .planner import MutationPlanner, StrategyPlanner
-from .schemas import GeneratedCase, SeedCase
-from .seed_samplers import build_sampler_instances
+from amacl.config import RuntimeConfig
+from amacl.operators import build_operator_catalogue
+from amacl.planner import MutationPlanner, StrategyPlanner
+from amacl.schemas import GeneratedCase, SeedCase
+from amacl.seed_samplers import build_sampler_instances
 
 
 class QuestionGenerationAgent:

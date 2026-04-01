@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass
 
-from .registry import OPERATOR_REGISTRY, register_operator
+from amacl.registry import OPERATOR_REGISTRY, register_operator
 
 
 @dataclass(slots=True)

@@ -1,6 +1,6 @@
 """AMACL MVP package."""
 
-from .agent import QuestionGenerationAgent
-from .config import RuntimeConfig
+from amacl.agent import QuestionGenerationAgent
+from amacl.config import RuntimeConfig
 
 __all__ = ["QuestionGenerationAgent", "RuntimeConfig"]
