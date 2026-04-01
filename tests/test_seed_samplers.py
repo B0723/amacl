@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+import tempfile
 import unittest
+from pathlib import Path
 
 from amacl.config import RuntimeConfig
 from amacl.schemas import SeedCase
 from amacl.seed_samplers import build_sampler_instances
+from amacl.utils import load_seed_cases
 
 
 class SeedSamplerTest(unittest.TestCase):
@@ -40,6 +43,55 @@ class SeedSamplerTest(unittest.TestCase):
     def test_boundary_sampler(self) -> None:
         matched = self.samplers["boundary_confidence"].candidates(self.cases, self.config)
         self.assertEqual([case.seed_id for case in matched], ["boundary"])
+
+    def test_load_multiline_json_object(self) -> None:
+        content = """
+{
+  "seed_id": "case_001",
+  "query": "苹果手机",
+  "doc": "Apple iPhone 15 Pro",
+  "label": 1,
+  "query_frequency": 5600,
+  "exposure": 2300,
+  "click": 120,
+  "ctr": 0.052,
+  "student_confidence": 0.53,
+  "tags": ["online_hardcase"],
+  "meta": {
+    "biz_scene": "search"
+  }
+}
+""".strip()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = Path(tmpdir) / "seed.jsonl"
+            path.write_text(content, encoding="utf-8")
+            cases = load_seed_cases(path)
+
+        self.assertEqual(len(cases), 1)
+        self.assertEqual(cases[0].seed_id, "case_001")
+        self.assertEqual(cases[0].meta["biz_scene"], "search")
+
+    def test_load_concatenated_multiline_json_objects(self) -> None:
+        content = """
+{
+  "seed_id": "case_001",
+  "query": "苹果手机",
+  "doc": "Apple iPhone 15 Pro",
+  "label": 1
+}
+{
+  "seed_id": "case_002",
+  "query": "火锅",
+  "doc": "重庆火锅双人餐",
+  "label": 1
+}
+""".strip()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = Path(tmpdir) / "seed.jsonl"
+            path.write_text(content, encoding="utf-8")
+            cases = load_seed_cases(path)
+
+        self.assertEqual([case.seed_id for case in cases], ["case_001", "case_002"])
 
 
 if __name__ == "__main__":

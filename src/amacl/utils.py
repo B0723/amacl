@@ -8,14 +8,22 @@ from amacl.schemas import SeedCase
 
 
 def load_seed_cases(path: str | Path) -> list[SeedCase]:
-    cases: list[SeedCase] = []
-    with Path(path).open("r", encoding="utf-8") as handle:
-        for line in handle:
-            line = line.strip()
-            if not line:
-                continue
-            cases.append(SeedCase.from_dict(json.loads(line)))
-    return cases
+    content = Path(path).read_text(encoding="utf-8").strip()
+    if not content:
+        return []
+
+    try:
+        payload = json.loads(content)
+    except json.JSONDecodeError:
+        payload = _load_concatenated_json_objects(content)
+
+    if isinstance(payload, dict):
+        return [SeedCase.from_dict(payload)]
+
+    if isinstance(payload, list):
+        return [SeedCase.from_dict(item) for item in payload]
+
+    raise ValueError("Seed file must contain a JSON object, a JSON array, or concatenated JSON objects.")
 
 
 def dump_jsonl(path: str | Path, rows: list[dict[str, Any]]) -> None:
@@ -42,3 +50,24 @@ def extract_json_object(text: str) -> dict[str, Any]:
                 payload = text[start : index + 1]
                 return json.loads(payload)
     raise ValueError("Incomplete JSON object in model output.")
+
+
+def _load_concatenated_json_objects(content: str) -> list[dict[str, Any]]:
+    decoder = json.JSONDecoder()
+    cursor = 0
+    payloads: list[dict[str, Any]] = []
+
+    while cursor < len(content):
+        while cursor < len(content) and content[cursor].isspace():
+            cursor += 1
+
+        if cursor >= len(content):
+            break
+
+        item, next_cursor = decoder.raw_decode(content, cursor)
+        if not isinstance(item, dict):
+            raise ValueError("Concatenated JSON input must contain JSON objects.")
+        payloads.append(item)
+        cursor = next_cursor
+
+    return payloads
