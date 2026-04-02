@@ -1,0 +1,16 @@
+{
+    "seed_id": "case_001",
+    "query": "苹果手机",
+    "doc": "Apple iPhone 15 Pro",
+    "label": 1,
+    "query_frequency": 5600,
+    "exposure": 2300,
+    "click": 120,
+    "ctr": 0.052,
+    "student_confidence": 0.53,
+    "tags": ["online_hardcase"],
+    "meta": {
+      "biz_scene": "search"
+    }
+}
+  
