@@ -1,3 +1,13 @@
+"""seed_samplers.py
+
+冷启动阶段不再需要 Agent 动态选择 seed 策略。
+Seed pool 的划分（高频/长尾/边界/在线难例）由离线数据处理流程决定，
+直接对应 data/ 目录下的不同 JSON 文件（high_frequency.json 等）。
+
+本模块保留 SeedSampler 基类和各采样器实现，供后续引入 ZPD Reward 的
+交替迭代训练阶段使用（届时可能需要在一个 pool 内部按置信度二次过滤）。
+"""
+
 from __future__ import annotations
 
 import random
@@ -35,48 +45,17 @@ class SeedSampler(ABC):
 @register_sampler
 class HighFreqQuerySampler(SeedSampler):
     name = "high_freq_query"
-    description = "采样高频头部 query，主要用于防退化和稳态训练。"
+    description = "高频头部 query 采样器，对应 high_frequency.json。"
 
     def is_match(self, case: SeedCase, config: RuntimeConfig) -> bool:
-        return case.query_frequency is not None and case.query_frequency >= config.high_freq_threshold
-
-
-@register_sampler
-class TailQuerySampler(SeedSampler):
-    name = "tail_query"
-    description = "采样长尾或低频 query，主要用于考察泛化能力。"
-
-    def is_match(self, case: SeedCase, config: RuntimeConfig) -> bool:
-        return case.query_frequency is not None and case.query_frequency <= config.tail_freq_threshold
-
-
-@register_sampler
-class OnlineHardcaseSampler(SeedSampler):
-    name = "online_hardcase"
-    description = "采样线上高曝光低点击或已标记 hardcase 的样本。"
-
-    def is_match(self, case: SeedCase, config: RuntimeConfig) -> bool:
-        if "online_hardcase" in case.tags or bool(case.meta.get("is_online_hardcase")):
-            return True
-
-        if case.exposure is None:
-            return False
-
-        ctr = case.ctr
-        if ctr is None and case.click is not None and case.exposure > 0:
-            ctr = case.click / case.exposure
-
-        return (
-            ctr is not None
-            and case.exposure >= config.online_hardcase_min_exposure
-            and ctr <= config.online_hardcase_max_ctr
-        )
+        # 冷启动阶段：数据文件本身已经是高频 pool，直接全量匹配
+        return True
 
 
 @register_sampler
 class BoundaryConfidenceSampler(SeedSampler):
     name = "boundary_confidence"
-    description = "采样 student 置信度位于边界区间的样本。"
+    description = "Student 置信度位于边界区间的样本（用于后续迭代阶段）。"
 
     def is_match(self, case: SeedCase, config: RuntimeConfig) -> bool:
         if case.student_confidence is None:
@@ -86,16 +65,3 @@ class BoundaryConfidenceSampler(SeedSampler):
 
 def build_sampler_instances() -> dict[str, SeedSampler]:
     return {name: sampler_cls() for name, sampler_cls in SAMPLER_REGISTRY.items()}
-
-
-def build_sampler_summaries(cases: list[SeedCase], config: RuntimeConfig) -> list[dict[str, str | int]]:
-    summaries: list[dict[str, str | int]] = []
-    for sampler in build_sampler_instances().values():
-        summaries.append(
-            {
-                "name": sampler.name,
-                "description": sampler.description,
-                "candidate_count": len(sampler.candidates(cases, config)),
-            }
-        )
-    return summaries
